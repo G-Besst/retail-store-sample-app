@@ -1,0 +1,13 @@
+name: Dev Env Workflow
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  call-shared:
+    uses: ./.github/workflows/shared-build-pipeline.yml
+    with:
+      environment: "development"
+      imagename: "retailappui"

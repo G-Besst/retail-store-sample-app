@@ -1,0 +1,42 @@
+name: Shared Workflow
+
+on:
+  workflow_call: # this Enables this workflow to be called from another workflow
+    inputs: # This allows you define variables that can be used accross different workflows. just like the parameters in azure devops
+      environment:
+        required: true
+        type: string
+      imagename:
+        required: true
+        type: string
+
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
+env: # this allows you declare global variables to be used within the script
+  DOCKER_TAG: "dev"
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository  #this step is mandatory for access to repository e.g to run scripts or access dockerfile
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./src/ui/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ inputs.imagename }}:${{ github.run_id }}
